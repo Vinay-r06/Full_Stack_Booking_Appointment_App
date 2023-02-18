@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Booking App</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <header class="header">
+        <h2 style="text-align: center"> Appointment Booking Application </h2>
+     </header>
+
+     <main>
+        <div class="main-div">    
+         <h3 style="text-align: center; color: rgb(255, 255, 255)"> BOOK A CALL</h3>   
+         <h4 style="text-align: center">
+            Book a call, our team will reach u within 24 hrs.
+         </h4>
+         <hr width="100%" size="5px" style="background-color: black">
+       <form action="#" id="myform" method="POST" onsubmit='savetoBookingDetail(event)'>
+        <div class="fill" style="background-color:rgba(183, 195, 217, 0.936); padding:5px; margin: 5px"></div>  
+        <label>Name</label><br>
+        <input type="text" name="name" id="name" required/><br>
+        <label>Email</label><br>
+        <input type="email" name="email" id="email" required/><br>
+        <label>Phone Number</label><br>
+        <input type="text" name="phone" id="phone" required/><br><br>
+        <input class='btn' type="submit" value="GET A CALL"/>
+        <!-- <input class='rbtn' id="rbtn" type="button" value="RESET"/> -->
+                                                                                 <!-- <ul id="listOfusers"></ul>      if u put here u cant delete the repeated user details..... u can delete first repeated user and then keep deleting user but repeated user cant delete details start remove from first repeated  -->
+            </form>
+            <ul id="booking"></ul>
+        </div>
+     </main>
+            
+     
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js"></script>
+
+        <script>
+
+
+            function savetoBookingDetail(event){
+                event.preventDefault();
+               const name= document.getElementById("name").value;
+               const email=document.getElementById("email").value;
+               const phone=document.getElementById("phone").value;
+
+        const detail={
+            name:name,
+            email:email,
+            phone:phone
+
+                    }
+                                                                   // axios libraraies 'post' for post data and save to database
+
+                   axios.post("http://localhost:3000/add", detail)                                                    //i will do network call and save it over there.
+                   .then((response)=>{
+                    showNewUserScreen(response.data.newBookingDetail)
+                    console.log(response)
+                   }) 
+                   .catch((err)=>{
+                    document.body.innerHTML= document.body.innerHTML + "<h4>Something went wrong in post</h4>"
+                    console.log(err);
+                   })
+
+                                                                                                                      // showNewUserScreen(details)
+                                                                                                                       //  localStorage.setItem(details.email,JSON.stringify( details))  //in console or local storage "json stringfy"
+                };
+
+                                                                                                                       // The DOMContentLoaded event fires when the initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.
+            
+                window.addEventListener("DOMContentLoaded",()=>{
+                axios.get("http://localhost:3000/get-data")  
+                       .then((response)=>{
+                    console.log(response)
+                 for(var i=0;i<response.data.allBooking.length;i++){
+                    showNewUserScreen(response.data.allBooking[i]);                                                             //response.data nothing but object
+                 }
+             })
+
+                .catch((err)=>{
+                    document.body.innerHTML= document.body.innerHTML + "<h4>Something went wrong in reload</h4>"
+                    console.log(err);
+
+                   })
+                                                                                                                                    //  console.log(data);              // i will get some data which is promise which is returning from promise
+                })
+
+               function showNewUserScreen(detail){
+                document.getElementById('name').value='';
+                document.getElementById('email').value='';
+                document.getElementById('phone').value='';
+
+                //  if(allBooking.getItem(detail.email)!==null){
+                //      removeUserFromScreen(detail.email);
+                //  }
+                const parentNode = document.getElementById('booking');
+                const childHTML = `<li id=${detail.id}> ${detail.name}  ${detail.email}  ${detail.phonenumber}
+                                        <button onclick=deleteUser('${detail.id}')> Delete User </button> 
+                                        <button onclick=editUser('${detail.name}','${detail.email}','${detail.phonenumber},'${detail.id}')> Edit User </button>
+                                     </li>`
+
+                parentNode.innerHTML = parentNode.innerHTML + childHTML;
+            }
+
+            function editUser(name,email,phone,userId){
+                console.log(userId);
+               
+                document.getElementById('name').value=name;
+                document.getElementById('email').value=email;
+                document.getElementById('phone').value=phone;
+                deleteUser(userId);
+
+            }
+
+
+            function deleteUser(userId){
+            axios.delete(`http://localhost:3000/delete-data/${userId}`)
+            .then((response)=>{
+                
+                removeUserFromScreen(userId);
+            })
+            .catch((err)=>{
+                document.body.innerHTML= document.body.innerHTML + "<h4>Something went wrong in delete</h4>"
+                    console.log(err);  
+            })
+
+            }
+
+           
+
+            function removeUserFromScreen(userId){
+                const parentNode = document.getElementById('booking');
+                const childNodeToBeDeleted = document.getElementById(userId);
+                   
+                if(childNodeToBeDeleted){
+                parentNode.removeChild(childNodeToBeDeleted) }
+            }
+
+
+
+        </script>
+    
+</body>
+</html>
